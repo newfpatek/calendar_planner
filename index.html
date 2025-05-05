@@ -538,7 +538,8 @@
       }
     }
 
-    const todayStr = formatDate(new Date());
+    const now = new Date();
+    const todayStr = formatDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
 
     const allEventsSorted = useMemo(() => {
       let arr = [];
