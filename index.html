@@ -1,13 +1,785 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>React + TypeScript + Replit</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/index.jsx"></script>
-  </body>
+<html lang="ru">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>React Calendar Planner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Mulish:wght@400;700&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Mulish', sans-serif;
+    background: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 10px;
+  }
+
+  #root {
+    background: white;
+    width: 350px;
+    max-width: 100vw;
+    height: 600px;
+    max-height: 100vh;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  header {
+    padding: 12px 16px;
+    background: linear-gradient(90deg, #4e91f9 0%, #6cdbeb 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 1.3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  header h1 {
+    margin: 0;
+  }
+
+  .date-picker-container {
+    padding: 8px 16px;
+    background: #e9f1fc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .date-picker-container label {
+    font-weight: 600;
+    color: #444;
+    margin-right: 8px;
+  }
+
+  .date-picker-container input[type="date"] {
+    padding: 6px 10px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .calendar, .events-list-wrapper {
+    flex: 1;
+    padding: 8px 12px 4px 12px;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: 600;
+    color: #777;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+  }
+
+  .days {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: 48px;
+    gap: 4px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+
+  .day {
+    background: #f0f3fa;
+    border-radius: 8px;
+    padding: 4px 6px;
+    font-size: 0.85rem;
+    color: #444;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .day.today {
+    background: #6cdbeb;
+    color: white;
+  }
+
+  .day.not-current-month {
+    color: #bbb;
+    background: transparent;
+    cursor: default;
+  }
+
+  .day:hover:not(.not-current-month) {
+    background: #4e91f9;
+    color: white;
+  }
+
+  .day-number {
+    font-weight: 700;
+    margin-bottom: 4px;
+    flex-shrink: 0;
+  }
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right:0;
+    bottom:0;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    padding: 10px;
+  }
+
+  .modal {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 340px;
+    padding: 20px 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #1a1a1a;
+  }
+
+  .modal label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+    color: #333;
+  }
+
+  .modal input[type="text"],
+  .modal textarea,
+  .modal input[type="time"],
+  .modal input[type="date"] {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 14px;
+    font-family: inherit;
+    resize: vertical;
+  }
+
+  .modal textarea {
+    min-height: 60px;
+  }
+
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .btn {
+    cursor: pointer;
+    padding: 8px 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    background: #4e91f9;
+    color: white;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+
+  .btn:hover {
+    background: #3777e3;
+  }
+
+  .btn.cancel {
+    background: #aaa;
+  }
+
+  .btn.cancel:hover {
+    background: #888;
+  }
+
+  .events-list-wrapper {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Event marker */
+  .event-marker {
+  width: 8px;
+  height: 8px;
+  background: #4e91f9;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+}
+
+  /* Selected day highlight */
+  .day.selected {
+    outline: 2px solid #3777e3;
+    outline-offset: 2px;
+  }
+
+  .events-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 12px;
+    background: #f9fbff;
+    border-radius: 10px;
+  }
+
+  .events-list h3 {
+    margin: 0 0 8px 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #333;
+  }
+
+  .events-list .event-item {
+    background: #4e91f9;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .events-list .event-item span.details {
+    cursor: pointer;
+    flex: 1;
+  }
+
+  .events-list .event-item button {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.9);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 4px;
+    user-select: none;
+  }
+  .events-list .event-item button:hover {
+    color: rgba(255,255,255,1);
+  }
+
+
+  /* Footer navigation buttons */
+
+  .bottom-nav {
+    display: flex;
+    border-top: 1px solid #ddd;
+    background: #f0f3fa;
+  }
+  .bottom-nav button {
+    flex: 1;
+    border: none;
+    background: #6cdbeb;
+    color: #1a1a1a;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 10px 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  .bottom-nav button:not(:last-child) {
+    border-right: 1px solid #ddd;
+  }
+  .bottom-nav button:hover {
+    background: #4e91f9;
+    color: white;
+  }
+  .bottom-nav button[aria-pressed="true"] {
+    background: #3777e3;
+    color: white;
+  }
+
+  /* Add event button - smaller square with plus sign */
+
+  .add-event-button {
+    background: #4e91f9;
+    color: white;
+    font-weight: 700;
+    font-size: 1.6rem;
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+    margin: 0 auto 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .add-event-button:hover {
+    background: #3777e3;
+  }
+
+  @media (max-width: 400px) {
+    #root {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+    }
+
+    .modal {
+      max-width: 95vw;
+      max-height: 90vh;
+    }
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+  const { useState, useEffect, useMemo } = React;
+
+  function CalendarPlanner() {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [events, setEvents] = useState(() => {
+      try {
+        const saved = localStorage.getItem('calendar-planner-events');
+        return saved ? JSON.parse(saved) : {};
+      } catch {
+        return {};
+      }
+    });
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [formValues, setFormValues] = useState({ title: '', time: '', description: '' });
+    const [viewMode, setViewMode] = useState('calendar');
+    const [datePickerValue, setDatePickerValue] = useState(formatDate(new Date()));
+    const [dayEventsVisibleDate, setDayEventsVisibleDate] = useState(null);
+
+    useEffect(() => {
+      localStorage.setItem('calendar-planner-events', JSON.stringify(events));
+    }, [events]);
+
+    useEffect(() => {
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }, []);
+
+    function startOfMonthMonday(date) {
+     const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+     const firstDayWeekday = firstDayOfMonth.getDay(); // 0-6
+     const adjustedFirstDayWeekday = (firstDayWeekday === 0) ? 6 : firstDayWeekday - 1;
+     firstDayOfMonth.setDate(firstDayOfMonth.getDate() - adjustedFirstDayWeekday);
+  
+     return firstDayOfMonth;
+}
+
+    const calendarDays = useMemo(() => {
+      const days = [];
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      let current = startOfMonthMonday(currentDate);
+      for (let i = 0; i< 42; i++) {
+        days.push({
+          date: new Date(current),
+          currentMonth: current.getMonth() === month,
+        });
+        current.setDate(current.getDate() + 1);
+      }
+      return days;
+    }, [currentDate]);
+
+    const weekdayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+    function formatDate(date) {
+  const moscowDate = new Date(date.toLocaleString("en-US", { timeZone: "Europe/Moscow" }));
+  return moscowDate.toISOString().split('T')[0];
+  }
+
+    function openAddEvent(date) {
+      setSelectedDate(date);
+      setSelectedEvent(null);
+      setFormValues({ title: '', time: '', description: '' });
+      setModalOpen(true);
+    }
+
+    function openEditEvent(dateKey, event) {
+      setSelectedDate(new Date(dateKey));
+      setSelectedEvent({ ...event, dateKey });
+      setFormValues({
+        title: event.title,
+        time: event.time,
+        description: event.description
+      });
+      setModalOpen(true);
+    }
+
+    function saveEvent() {
+      if (!formValues.title.trim()) {
+        alert('Пожалуйста, введите название события.');
+        return;
+      }
+      const dateKey = formatDate(selectedDate);
+      if (selectedEvent) {
+        setEvents(prev => {
+          const updatedDayEvents = prev[selectedEvent.dateKey].map(ev => {
+            if (ev.id === selectedEvent.id) {
+              return {
+                ...ev,
+                title: formValues.title.trim(),
+                time: formValues.time,
+                description: formValues.description.trim(),
+              };
+            }
+            return ev;
+          });
+          if (selectedEvent.dateKey !== dateKey) {
+            const oldDayEvents = prev[selectedEvent.dateKey].filter(ev => ev.id !== selectedEvent.id);
+            const newDayEvents = prev[dateKey] ? [...prev[dateKey], {
+              id: selectedEvent.id,
+              title: formValues.title.trim(),
+              time: formValues.time,
+              description: formValues.description.trim(),
+            }] : [{
+              id: selectedEvent.id,
+              title: formValues.title.trim(),
+              time: formValues.time,
+              description: formValues.description.trim(),
+            }];
+            const newEvents = {...prev};
+            if (oldDayEvents.length > 0) {
+              newEvents[selectedEvent.dateKey] = oldDayEvents;
+            } else {
+              delete newEvents[selectedEvent.dateKey];
+            }
+            newEvents[dateKey] = newDayEvents;
+            return newEvents;
+          } else {
+            return { ...prev, [dateKey]: updatedDayEvents };
+          }
+        });
+      } else {
+        const newEvent = {
+          id: Date.now(),
+          title: formValues.title.trim(),
+          time: formValues.time,
+          description: formValues.description.trim(),
+        };
+        setEvents(prev => {
+          const dayEvents = prev[dateKey] ? [...prev[dateKey], newEvent] : [newEvent];
+          return {...prev, [dateKey]: dayEvents};
+        });
+      }
+      setModalOpen(false);
+      setDayEventsVisibleDate(null);
+    }
+
+    function removeEvent(dateKey, eventId) {
+      setEvents(prev => {
+        const filtered = prev[dateKey].filter(ev => ev.id !== eventId);
+        const newEvents = { ...prev };
+        if (filtered.length === 0) {
+          delete newEvents[dateKey];
+        } else {
+          newEvents[dateKey] = filtered;
+        }
+        return newEvents;
+      });
+      if (selectedEvent && selectedEvent.id === eventId) {
+        setModalOpen(false);
+      }
+    }
+
+    function onDatePickerChange(e) {
+      const val = e.target.value;
+      setDatePickerValue(val);
+      if (val) {
+        const [y,m,d] = val.split("-");
+        setCurrentDate(new Date(y, parseInt(m,10), d));
+        setDayEventsVisibleDate(null);
+      }
+    }
+
+    const todayStr = formatDate(new Date());
+
+    const allEventsSorted = useMemo(() => {
+      let arr = [];
+      Object.entries(events).forEach(([dateKey, evs]) => {
+        evs.forEach(ev => arr.push({ ...ev, dateKey }));
+      });
+      arr.sort((a,b) => {
+        if (a.dateKey< b.dateKey) return -1;
+        if (a.dateKey > b.dateKey) return 1;
+        if (!a.time) return 1;
+        if (!b.time) return -1;
+        return a.time.localeCompare(b.time);
+      });
+      return arr;
+    }, [events]);
+
+    // Events for selected day for bottom list
+    const dayEvents = dayEventsVisibleDate && events[formatDate(dayEventsVisibleDate)] ? events[formatDate(dayEventsVisibleDate)] : [];
+
+    // On day cell click: show events list for day below calendar
+    function onDayClick(date, hasEvents) {
+        setDayEventsVisibleDate(date);
+    }
+
+    return React.createElement('div', {className: 'calendar-planner', style: {height:'100%', display:'flex', flexDirection:'column', overflow: 'hidden'}},
+      React.createElement('header', {role: 'banner'},
+        React.createElement('h1', null, 'Календарь')
+      ),
+      React.createElement('div', {className: 'date-picker-container'},
+        React.createElement('label', {htmlFor: 'datePickerInput'}, 'Выбор даты:'),
+        React.createElement('input', {
+          type: 'date',
+          id: 'datePickerInput',
+          value: datePickerValue,
+          onChange: onDatePickerChange
+        })
+      ),
+      viewMode === 'calendar' && React.createElement(React.Fragment, null,
+        React.createElement('div', {className: 'calendar', role: 'application', 'aria-label': 'Месячный календарь', style: {flexGrow: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column'}},
+          React.createElement('div', {className: 'weekdays'}, weekdayNames.map(wd => React.createElement('div', {key: wd}, wd))),
+          React.createElement('div', {className: 'days'}, calendarDays.map(({date, currentMonth}) => {
+            const dateKey = formatDate(date);
+            const isToday = dateKey === todayStr;
+            const hasEvents = events[dateKey]?.length > 0;
+            const isSelected = dayEventsVisibleDate && dateKey === formatDate(dayEventsVisibleDate);
+            return React.createElement('div', {
+              key: date.toString(),
+              className:
+                'day' +
+                (isToday ? ' today' : '') +
+                (currentMonth ? '' : ' not-current-month') +
+                (isSelected ? ' selected' : ''),
+              onClick: currentMonth ? () => onDayClick(date, hasEvents) : undefined,
+              tabIndex: currentMonth ? 0 : -1,
+              role: currentMonth ? 'button' : undefined,
+              'aria-label': currentMonth ? `День ${date.getDate()}${hasEvents ? ', есть события' : ''}` : undefined,
+            },
+              React.createElement('div', {className: 'day-number'}, date.getDate()),
+              hasEvents && React.createElement('div', {className: 'event-marker'})
+            );
+          }))
+        ),
+        React.createElement('button', {
+          className: 'add-event-button',
+          onClick: () => openAddEvent(currentDate),
+          'aria-label': 'Добавить событие'
+        }, '+'),
+        dayEventsVisibleDate && dayEvents.length > 0 ? React.createElement('div', {className: 'events-list-wrapper', 'aria-live': 'polite'},
+          React.createElement('h3', null, `События за ${dayEventsVisibleDate.toLocaleDateString()}`),
+          React.createElement('div', {className: 'events-list'},
+            dayEvents.map(ev => React.createElement('div', {className: 'event-item', key: ev.id},
+              React.createElement('span', {
+                className: 'details',
+                tabIndex: 0,
+                role: 'button',
+                onClick: () => openEditEvent(formatDate(dayEventsVisibleDate), ev),
+                onKeyDown: (e) => { if (e.key === 'Enter') openEditEvent(formatDate(dayEventsVisibleDate), ev); },
+                title: ev.description || ev.title,
+                'aria-label': `Редактировать событие ${ev.title} в ${ev.time || 'без времени'}`
+              }, (ev.time ? ev.time + ' ' : '') + ev.title),
+              React.createElement('button', {
+                'aria-label': `Удалить событие ${ev.title}`,
+                onClick: () => removeEvent(formatDate(dayEventsVisibleDate), ev.id)
+              }, '×')
+            ))
+          )
+        ) : null
+      ),
+      viewMode === 'list' && React.createElement('div', {className: 'events-list-wrapper', style: {flexGrow: 1, overflow: 'hidden'}},
+        React.createElement(EventsList, {
+          events: allEventsSorted,
+          onEdit: openEditEvent,
+          onDelete: removeEvent
+        }),
+      ),
+      modalOpen && React.createElement(EventModal, {
+        date: selectedDate,
+        formValues,
+        setFormValues,
+        onClose: () => {
+          setModalOpen(false);
+          setSelectedEvent(null);
+          setDayEventsVisibleDate(null);
+        },
+        onSave: saveEvent,
+        editingEvent: selectedEvent,
+        setSelectedDate
+      }),
+      React.createElement('div', {className: 'bottom-nav', role: "tablist", 'aria-label': 'Переключение видов'},
+        React.createElement('button', {
+          'aria-pressed': viewMode === 'list',
+          onClick: () => {
+            setViewMode('list');
+            setDayEventsVisibleDate(null);
+          },
+          role: "tab",
+          tabIndex: 0,
+          'aria-label': 'Показать список событий',
+        }, 'Список событий'),
+        React.createElement('button', {
+          'aria-pressed': viewMode === 'calendar',
+          onClick: () => setViewMode('calendar'),
+          role: "tab",
+          tabIndex: 0,
+          'aria-label': 'Показать календарь',
+        }, 'Календарь'),
+        React.createElement('button', {
+          disabled: true,
+          style: {opacity: 0, cursor: 'default'},
+          tabIndex: -1,
+          'aria-hidden': true
+        }, '') 
+      )
+    );
+  }
+
+  function EventModal({ date, formValues, setFormValues, onClose, onSave, editingEvent, setSelectedDate }) {
+    function formatDate(date) {
+    const moscowDate = new Date(date.toLocaleString("en-US", { timeZone: "Europe/Moscow" }));
+    return moscowDate.toISOString().split('T')[0];
+    }
+
+    function onDateChange(e) {
+      const val = e.target.value;
+      if (val) {
+        const [y,m,d] = val.split("-");
+        const parsedDate = new Date(y, parseInt(m,10) - 1, parseInt(d,10));
+        setSelectedDate(parsedDate);
+      }
+    }
+
+    return React.createElement('div', {className:'modal-overlay', role:'dialog', 'aria-modal':'true', 'aria-labelledby':'modalTitle'},
+      React.createElement('div', {className:'modal'},
+        React.createElement('h2', {id:'modalTitle'}, editingEvent ? 'Редактировать событие' : `Добавить событие для ${date.toDateString()}`),
+        React.createElement('label', {htmlFor: 'modalDate'}, 'Дата'),
+        React.createElement('input', {
+          id: 'modalDate',
+          type: 'date',
+          required: true,
+          value: formatDate(date),
+          onChange: onDateChange,
+        }),
+        React.createElement('label', {htmlFor: 'titleInput'}, 'Название *'),
+        React.createElement('input', {
+          id: 'titleInput',
+          type: 'text',
+          value: formValues.title,
+          onChange: e => setFormValues(prev => ({...prev, title: e.target.value})),
+          autoFocus: true,
+          required: true,
+          maxLength: 50,
+          placeholder: 'Название события',
+        }),
+        React.createElement('label', {htmlFor: 'timeInput'}, 'Время (необязательно)'),
+        React.createElement('input', {
+          id: 'timeInput',
+          type: 'time',
+          value: formValues.time,
+          onChange: e => setFormValues(prev => ({...prev, time: e.target.value})),
+        }),
+        React.createElement('label', {htmlFor: 'descInput'}, 'Описание (необязательно)'),
+        React.createElement('textarea', {
+          id: 'descInput',
+          value: formValues.description,
+          onChange: e => setFormValues(prev => ({...prev, description: e.target.value})),
+          maxLength: 200,
+          placeholder: 'Дополнительные детали',
+        }),
+        React.createElement('div', {className:'modal-buttons'},
+          React.createElement('button', {className:'btn cancel', onClick:onClose}, 'Отмена'),
+          React.createElement('button', {className:'btn', onClick:onSave}, 'Сохранить')
+        )
+      )
+    );
+  }
+
+  function EventsList({ events, onEdit, onDelete }) {
+    if (!events.length) {
+      return React.createElement('div', {className: 'events-list', role:'region', 'aria-label':'Список событий'}, 
+        React.createElement('h3', null, 'Нет запланированных событий'));
+    }
+    const grouped = {};
+    events.forEach(ev => {
+      if (!grouped[ev.dateKey]) grouped[ev.dateKey] = [];
+      grouped[ev.dateKey].push(ev);
+    });
+    const sortedDates = Object.keys(grouped).sort();
+
+    return React.createElement('section', {className: 'events-list', role: 'region', 'aria-label': 'Список запланированных событий'},
+      React.createElement('h3', null, 'Запланированные события'),
+      sortedDates.map(dateKey => {
+        return React.createElement('div', {key: dateKey},
+          React.createElement('h4', {style: {margin: '4px 0', fontWeight: '600', fontSize: '1rem', color: '#555'}},
+            new Date(dateKey).toLocaleDateString(undefined, {year:'numeric', month:'long', day:'numeric'})
+          ),
+          grouped[dateKey].map(ev =>
+            React.createElement('div', {className: 'event-item', key: ev.id},
+              React.createElement('span', {
+                className: 'details',
+                tabIndex: 0,
+                role: 'button',
+                onClick: () => onEdit(dateKey, ev),
+                onKeyDown: (e) => { if (e.key === 'Enter') onEdit(dateKey, ev); },
+                title: ev.description || ev.title,
+                'aria-label': `Редактировать событие ${ev.title} в ${ev.time || 'без времени'}`
+              }, (ev.time ? ev.time + ' ' : '') + ev.title),
+              React.createElement('button', {
+                'aria-label': `Удалить событие ${ev.title}`,
+                onClick: () => onDelete(dateKey, ev.id)
+              }, '×')
+            )
+          )
+        );
+      })
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    React.createElement(CalendarPlanner)
+  );
+</script>
+</body>
 </html>
+
