@@ -606,9 +606,10 @@
         }, '→')
       ),
       viewMode === 'calendar' && React.createElement(React.Fragment, null,
-        React.createElement('div', {className: 'calendar', role: 'application', 'aria-label': 'Месячный календарь', style: {flexGrow: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column'}},
-          React.createElement('div', {className: 'weekdays'}, weekdayNames.map(wd => React.createElement('div', {key: wd}, wd))),
-          React.createElement('div', {className: 'days'}, calendarDays.map(({date, currentMonth}) => {
+        React.createElement('div', {className: 'calendar-container', style: {flexGrow: 1, overflow: 'auto', display: 'flex', flexDirection: 'column'}},
+          React.createElement('div', {className: 'calendar', role: 'application', 'aria-label': 'Месячный календарь'},
+            React.createElement('div', {className: 'weekdays'}, weekdayNames.map(wd => React.createElement('div', {key: wd}, wd))),
+            React.createElement('div', {className: 'days'}, calendarDays.map(({date, currentMonth}) => {
             const dateKey = formatDate(date);
             const isToday = dateKey === todayStr;
             const hasEvents = events[dateKey]?.length > 0;
@@ -629,32 +630,34 @@
               hasEvents && React.createElement('div', {className: 'event-marker'})
             );
           }))
+          ),
+          dayEventsVisibleDate && dayEvents.length > 0 && React.createElement('div', {className: 'events-list-wrapper', 'aria-live': 'polite'},
+            React.createElement('h3', null, `События за ${dayEventsVisibleDate.toLocaleDateString()}`),
+            React.createElement('div', {className: 'events-list'},
+              dayEvents.map(ev => React.createElement('div', {className: 'event-item', key: ev.id},
+                React.createElement('span', {
+                  className: 'details',
+                  tabIndex: 0,
+                  role: 'button',
+                  onClick: () => openEditEvent(formatDate(dayEventsVisibleDate), ev),
+                  onKeyDown: (e) => { if (e.key === 'Enter') openEditEvent(formatDate(dayEventsVisibleDate), ev); },
+                  title: ev.description || ev.title,
+                  'aria-label': `Редактировать событие ${ev.title} в ${ev.time || 'без времени'}`
+                }, (ev.time ? ev.time + ' ' : '') + ev.title),
+                React.createElement('button', {
+                  'aria-label': `Удалить событие ${ev.title}`,
+                  onClick: () => removeEvent(formatDate(dayEventsVisibleDate), ev.id)
+                }, '×')
+              ))
+            )
+          )
         ),
         React.createElement('button', {
           className: 'add-event-button',
           onClick: () => openAddEvent(currentDate),
           'aria-label': 'Добавить событие'
         }, '+'),
-        dayEventsVisibleDate && dayEvents.length > 0 ? React.createElement('div', {className: 'events-list-wrapper', 'aria-live': 'polite'},
-          React.createElement('h3', null, `События за ${dayEventsVisibleDate.toLocaleDateString()}`),
-          React.createElement('div', {className: 'events-list'},
-            dayEvents.map(ev => React.createElement('div', {className: 'event-item', key: ev.id},
-              React.createElement('span', {
-                className: 'details',
-                tabIndex: 0,
-                role: 'button',
-                onClick: () => openEditEvent(formatDate(dayEventsVisibleDate), ev),
-                onKeyDown: (e) => { if (e.key === 'Enter') openEditEvent(formatDate(dayEventsVisibleDate), ev); },
-                title: ev.description || ev.title,
-                'aria-label': `Редактировать событие ${ev.title} в ${ev.time || 'без времени'}`
-              }, (ev.time ? ev.time + ' ' : '') + ev.title),
-              React.createElement('button', {
-                'aria-label': `Удалить событие ${ev.title}`,
-                onClick: () => removeEvent(formatDate(dayEventsVisibleDate), ev.id)
-              }, '×')
-            ))
-          )
-        ) : null
+        null
       ),
       viewMode === 'list' && React.createElement('div', {className: 'events-list-wrapper', style: {flexGrow: 1, overflow: 'hidden'}},
         React.createElement(EventsList, {
