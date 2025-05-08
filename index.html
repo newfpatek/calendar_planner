@@ -425,7 +425,21 @@
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
       let current = startOfMonthMonday(currentDate);
-      for (let i = 0; i< 42; i++) {
+      
+      // Получаем последний день месяца
+      const lastDay = new Date(year, month + 1, 0);
+      const lastDayWeekday = lastDay.getDay();
+      const adjustedLastDayWeekday = (lastDayWeekday === 0) ? 6 : lastDayWeekday - 1;
+      
+      // Вычисляем количество дней для отображения
+      const totalDays = adjustedLastDayWeekday + lastDay.getDate() + 
+                       (current.getDate() > 1 ? current.getDate() - 1 : 0);
+      
+      // Определяем нужное количество недель (5 или 6)
+      const weeksNeeded = Math.ceil(totalDays / 7);
+      const daysToShow = weeksNeeded * 7;
+
+      for (let i = 0; i < daysToShow; i++) {
         days.push({
           date: new Date(current),
           currentMonth: current.getMonth() === month,
