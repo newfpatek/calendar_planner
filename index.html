@@ -576,7 +576,7 @@
       React.createElement('header', {role: 'banner'},
         React.createElement('h1', null, 'Календарь')
       ),
-      React.createElement('div', {className: 'month-navigation'},
+      viewMode === 'calendar' && React.createElement('div', {className: 'month-navigation'},
         React.createElement('button', {
           onClick: () => {
             const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
