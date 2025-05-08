@@ -80,13 +80,29 @@
     text-transform: capitalize;
   }
 
-  .calendar, .events-list-wrapper {
+  .calendar {
     flex: 1;
     padding: 8px 10px 4px 10px;
     display: flex;
     flex-direction: column;
     user-select: none;
     overflow: hidden;
+  }
+
+  .events-list-wrapper {
+    flex: 1;
+    padding: 8px 10px 4px 10px;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .events-list-wrapper h3 {
+    margin: 0 0 8px 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #333;
   }
 
   .weekdays {
