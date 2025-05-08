@@ -87,6 +87,7 @@
     flex-direction: column;
     user-select: none;
     overflow: hidden;
+    flex-shrink: 0; /* Prevent calendar from shrinking */
   }
 
   .events-list-wrapper {
@@ -96,6 +97,8 @@
     flex-direction: column;
     user-select: none;
     overflow: hidden;
+    max-height: 300px;
+    overflow-y: auto;
   }
 
   .events-list-wrapper h3 {
@@ -377,6 +380,13 @@
     background: #3777e3;
   }
 
+  .calendar-container {
+    display: flex;
+    flex-direction: column;
+    min-height: min-content;
+  }
+
+
   @media (max-width: 400px) {
     #root {
       width: 100vw;
@@ -432,7 +442,7 @@
      const firstDayWeekday = firstDayOfMonth.getDay(); // 0-6
      const adjustedFirstDayWeekday = (firstDayWeekday === 0) ? 6 : firstDayWeekday - 1;
      firstDayOfMonth.setDate(firstDayOfMonth.getDate() - adjustedFirstDayWeekday);
-  
+
      return firstDayOfMonth;
 }
 
@@ -440,14 +450,14 @@
       const days = [];
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
-      
+
       // Находим последний день месяца
       const lastDayOfMonth = new Date(year, month + 1, 0);
       // Находим воскресенье недели, на которой заканчивается месяц
       const daysUntilEndOfWeek = 7 - lastDayOfMonth.getDay();
       const lastDayToShow = new Date(lastDayOfMonth);
       lastDayToShow.setDate(lastDayOfMonth.getDate() + (daysUntilEndOfWeek === 7 ? 0 : daysUntilEndOfWeek));
-      
+
       let current = startOfMonthMonday(currentDate);
       while (current <= lastDayToShow) {
         days.push({
@@ -832,4 +842,3 @@
 </script>
 </body>
 </html>
-
