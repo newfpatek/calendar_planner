@@ -586,7 +586,7 @@
           className: 'month-nav-button'
         }, '←'),
         React.createElement('span', {className: 'current-month'}, 
-          currentDate.toLocaleString('ru', { month: 'long', year: 'numeric' }).replace(' г.', ' г.').replace(' г.', ' г.')
+          currentDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })
         ),
         React.createElement('button', {
           onClick: () => {
