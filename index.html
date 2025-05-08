@@ -623,7 +623,7 @@
         }, '→')
       ),
       viewMode === 'calendar' && React.createElement(React.Fragment, null,
-        React.createElement('div', {className: 'calendar-container', style: {display: 'flex', flexDirection: 'column', overflow: 'auto'}},
+        React.createElement('div', {className: 'calendar-container', style: {display: 'flex', flexDirection: 'column', overflow: 'auto', flex: 1}},
           React.createElement('div', {className: 'calendar', role: 'application', 'aria-label': 'Месячный календарь'},
             React.createElement('div', {className: 'weekdays'}, weekdayNames.map(wd => React.createElement('div', {key: wd}, wd))),
             React.createElement('div', {className: 'days'}, calendarDays.map(({date, currentMonth}) => {
@@ -648,7 +648,7 @@
             );
           }))
           ),
-          dayEventsVisibleDate && dayEvents.length > 0 && React.createElement('div', {className: 'events-list-wrapper', 'aria-live': 'polite'},
+          dayEventsVisibleDate && dayEvents.length > 0 && React.createElement('div', {className: 'events-list-wrapper', style: {marginTop: '10px'}, 'aria-live': 'polite'},
             React.createElement('h3', null, `События за ${dayEventsVisibleDate.toLocaleDateString()}`),
             React.createElement('div', {className: 'events-list'},
               dayEvents.map(ev => React.createElement('div', {className: 'event-item', key: ev.id},
