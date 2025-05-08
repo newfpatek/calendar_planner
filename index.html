@@ -425,12 +425,25 @@
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
       let current = startOfMonthMonday(currentDate);
-      for (let i = 0; i< 42; i++) {
-        days.push({
-          date: new Date(current),
-          currentMonth: current.getMonth() === month,
-        });
-        current.setDate(current.getDate() + 1);
+      
+      while (days.length < 42) {
+        const week = [];
+        // Собираем неделю
+        for (let i = 0; i < 7; i++) {
+          week.push({
+            date: new Date(current),
+            currentMonth: current.getMonth() === month,
+          });
+          current.setDate(current.getDate() + 1);
+        }
+        
+        // Проверяем, является ли неделя полностью из другого месяца
+        const isFullWeekFromOtherMonth = week.every(day => !day.currentMonth);
+        
+        // Добавляем неделю только если она не полностью из другого месяца
+        if (!isFullWeekFromOtherMonth) {
+          days.push(...week);
+        }
       }
       return days;
     }, [currentDate]);
