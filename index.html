@@ -25,13 +25,12 @@
     background: white;
     width: 350px;
     max-width: 100vw;
-    height: 600px;
-    max-height: 100vh;
+    height: 100vh;
     border-radius: 10px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
     position: relative;
   }
 
@@ -78,8 +77,8 @@
     display: flex;
     flex-direction: column;
     user-select: none;
-    overflow: hidden;
-    height: 400px;
+    overflow: visible;
+    min-height: 400px;
   }
 
   .events-list-wrapper {
