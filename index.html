@@ -424,8 +424,16 @@
       const days = [];
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
+      
+      // Находим последний день месяца
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+      // Находим воскресенье недели, на которой заканчивается месяц
+      const daysUntilEndOfWeek = 7 - lastDayOfMonth.getDay();
+      const lastDayToShow = new Date(lastDayOfMonth);
+      lastDayToShow.setDate(lastDayOfMonth.getDate() + (daysUntilEndOfWeek === 7 ? 0 : daysUntilEndOfWeek));
+      
       let current = startOfMonthMonday(currentDate);
-      for (let i = 0; i < 42; i++) {
+      while (current <= lastDayToShow) {
         days.push({
           date: new Date(current),
           currentMonth: current.getMonth() === month,
