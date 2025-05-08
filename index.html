@@ -73,22 +73,13 @@
     cursor: pointer;
   }
 
-  .calendar {
+  .calendar, .events-list-wrapper {
+    flex: 1;
     padding: 8px 12px 4px 12px;
     display: flex;
     flex-direction: column;
     user-select: none;
     overflow: hidden;
-    height: 400px;
-  }
-
-  .events-list-wrapper {
-    padding: 8px 12px 4px 12px;
-    display: flex;
-    flex-direction: column;
-    user-select: none;
-    overflow-y: auto;
-    max-height: 150px;
   }
 
   .weekdays {
@@ -350,14 +341,13 @@
     cursor: pointer;
     user-select: none;
     transition: background-color 0.3s ease;
-    margin: 10px auto;
+    margin: 0 auto 0 ;
+    margin-bottom: 25px;
     display: flex;
     justify-content: center;
     align-items: center;
     line-height: 1;
     padding: 0;
-    position: sticky;
-    bottom: 10px;
   }
 
   .add-event-button:hover {
