@@ -1,44 +1,68 @@
 <!DOCTYPE html>
 <html lang="ru">
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>React Calendar Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#ff0000" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Calendar Planner" />
+<link rel="manifest" href="public/manifest.json" />
+<link rel="icon" type="image/png" sizes="192x192" href="public/icons/icon-192x192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="public/icons/icon-512x512.png" />
+<link rel="apple-touch-icon" href="public/icons/icon-192x192.png" />
+<title>Calendar Planner</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Mulish:wght@400;700&display=swap');
 
   * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
   }
 
   body {
-    margin: 0;
     font-family: 'Mulish', sans-serif;
     background: #f5f7fa;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding: 10px;
+    align-items: center;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
   #root {
     background: white;
-    width: 350px;
-    max-width: 100vw;
-    height: 600px;
-    max-height: 100vh;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: relative;
   }
 
+  @supports (padding: max(0px)) {
+    body {
+      padding-top: max(env(safe-area-inset-top), 0px);
+      padding-bottom: max(env(safe-area-inset-bottom), 0px);
+      padding-left: max(env(safe-area-inset-left), 0px);
+      padding-right: max(env(safe-area-inset-right), 0px);
+    }
+  }
+
   header {
     padding: 12px 16px;
-    background: linear-gradient(90deg, #4e91f9 0%, #6cdbeb 100%);
+    background: linear-gradient(90deg, #ff0000 0%, #ffc9c1 100%);
     color: white;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
     font-weight: 700;
     font-size: 1.3rem;
     display: flex;
@@ -51,26 +75,33 @@
   }
 
   .month-navigation {
-    padding: 8px 16px;
-    background: #e9f1fc;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 8px 12px;
+    border-radius: 22px;
+    background: #fce9e9;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    gap: 8px;
+    width: fit-content;
   }
 
   .month-nav-button {
-    background: #4e91f9;
+    background: linear-gradient(45deg, #f94e4e 0%, #ffc9c1 100%);
     color: white;
     border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
+    border-radius: 16px;
+    padding: 6px 14px;
     font-size: 1.2rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    flex-shrink: 0;
   }
 
   .month-nav-button:hover {
-    background: #3777e3;
+    background: linear-gradient(45deg, #e33737 0%, #ffc9c1 100%);
   }
 
   .current-month {
@@ -78,6 +109,40 @@
     color: #444;
     font-size: 1.1rem;
     text-transform: capitalize;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .month-select, .year-select {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 1rem;
+    color: #444;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .month-select:focus, .year-select:focus {
+    outline: none;
+    border-color: #ff9c9c;
+  }
+
+  .calendar-container {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .calendar-content {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
   }
 
   .calendar {
@@ -86,17 +151,21 @@
     flex-direction: column;
     user-select: none;
     overflow: hidden;
-    height: 400px;
-    min-height: 400px;
+    height: auto;
+    min-height: 300px;
+    flex-shrink: 0;
   }
 
   .events-list-wrapper {
-    flex: 1;
     padding: 8px 10px 4px 10px;
     display: flex;
     flex-direction: column;
     user-select: none;
     overflow: hidden;
+    height: 300px;
+    min-height: 300px;
+    flex-shrink: 0;
+    background: white;
   }
 
   .events-list-wrapper h3 {
@@ -120,7 +189,7 @@
     flex: 1;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    grid-auto-rows: 48px;
+    grid-auto-rows: 42px;
     gap: 4px;
     overflow-y: auto;
     padding: 6px 6px 6px 6px;
@@ -141,8 +210,27 @@
   }
 
   .day.today {
-    background: #6cdbeb;
+    background: linear-gradient(45deg, #f93b3b 0%, #ffc9c1 100%);
     color: white;
+  }
+
+  .day.today:hover:not(.not-current-month) {
+    background: linear-gradient(45deg, #f93b3b 0%, #ffc9c1 100%);
+    color: white;
+  }
+
+  .day.selected {
+    color: #ffffff;
+    background: linear-gradient(160deg, #ffcbcb 0%, #ffa1a1 100%);
+    outline: 2px solid #e33737;
+    outline-offset: 2px;
+  }
+
+  .day.today.selected {
+    color: #ffffff;
+    background: linear-gradient(45deg, #f93b3b 0%, #ffc9c1 100%);
+    outline: 2px solid #e33737;
+    outline-offset: 2px;
   }
 
   .day.not-current-month {
@@ -152,7 +240,7 @@
   }
 
   .day:hover:not(.not-current-month) {
-    background: #4e91f9;
+    background: linear-gradient(160deg, #ffcbcb 0%, #ffa1a1 100%);
     color: white;
   }
 
@@ -167,88 +255,91 @@
     position: fixed;
     top: 0;
     left: 0;
-    right:0;
-    bottom:0;
-    background: rgba(0,0,0,0.3);
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 10;
-    padding: 10px;
+    z-index: 1000;
   }
 
   .modal {
     background: white;
     border-radius: 12px;
-    width: 100%;
-    max-width: 340px;
-    padding: 20px 24px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
     max-height: 90vh;
     overflow-y: auto;
+    position: relative;
   }
 
   .modal h2 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: #1a1a1a;
+    margin: 0 0 20px;
+    color: #333;
+    font-size: 1.5rem;
   }
 
   .modal label {
-    font-weight: 600;
     display: block;
-    margin-bottom: 6px;
-    color: #333;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 600;
   }
 
   .modal input[type="text"],
-  .modal textarea,
   .modal input[type="time"],
-  .modal input[type="date"] {
+  .modal textarea {
     width: 100%;
-    padding: 8px 10px;
-    font-size: 1rem;
+    padding: 12px;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    border: 1px solid #ccc;
-    margin-bottom: 14px;
+    font-size: 1rem;
+    margin-bottom: 16px;
     font-family: inherit;
-    resize: vertical;
   }
 
-  .modal textarea {
-    min-height: 60px;
+  .modal input[type="text"]:focus,
+  .modal input[type="time"]:focus,
+  .modal textarea:focus {
+    outline: none;
+    border-color: #ff9c9c;
+    box-shadow: 0 0 0 2px rgba(255, 156, 156, 0.2);
   }
 
   .modal-buttons {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+    margin-top: 24px;
   }
 
   .btn {
-    cursor: pointer;
-    padding: 8px 16px;
-    font-weight: 600;
-    border-radius: 8px;
+    padding: 12px 24px;
     border: none;
-    background: #4e91f9;
-    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
     transition: background-color 0.3s ease;
-    user-select: none;
   }
 
-  .btn:hover {
-    background: #3777e3;
+  .btn:not(.cancel) {
+    background: #ff0000;
+    color: white;
+  }
+
+  .btn:not(.cancel):hover {
+    background: #cc0000;
   }
 
   .btn.cancel {
-    background: #aaa;
+    background: #f0f0f0;
+    color: #666;
   }
 
   .btn.cancel:hover {
-    background: #888;
+    background: #e0e0e0;
   }
 
   .events-list-wrapper {
@@ -256,21 +347,28 @@
     overflow: hidden;
   }
 
+  .events-list-wrapper h3 {
+    margin: 0 0 8px 12px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #333;
+  }
+
   /* Event marker */
   .event-marker {
   width: 8px;
   height: 8px;
-  background: #4e91f9;
+  background: #ff0000;
   border-radius: 50%;
   position: absolute;
   bottom: 6px;
   right: 6px;
 }
 
-  /* Selected day highlight */
-  .day.selected {
-    outline: 2px solid #3777e3;
-    outline-offset: 2px;
+  .day:hover .event-marker,
+  .day.today .event-marker,
+  .day.selected .event-marker {
+    background: #ffffff;
   }
 
   .events-list {
@@ -289,7 +387,7 @@
   }
 
   .events-list .event-item {
-    background: #4e91f9;
+    background: linear-gradient(135deg, #ff3939 0%, #ff9b9b 100%);
     color: white;
     border-radius: 6px;
     padding: 6px 10px;
@@ -298,14 +396,45 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: all 0.3s ease;
   }
 
-  .events-list .event-item span.details {
-    cursor: pointer;
-    flex: 1;
+  .events-list .event-item.completed {
+    background: linear-gradient(-45deg, #e0e0e0 20%, #b8b8b8 100%);
+    color: #666;
+    border: 1px solid #ddd;
   }
 
-  .events-list .event-item button {
+  .events-list .event-item.completed span.details {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  .events-list .event-item.completed button.complete {
+    color: #00c853;
+    font-weight: bold;
+  }
+
+  .events-list .event-item.completed button:not(.complete) {
+    color: #666;
+  }
+
+  .events-list .event-item.completed:hover {
+    background: linear-gradient(-45deg, #f5f5f5 20%, #e0e0e0 100%);
+  }
+
+  .events-list .event-item.completed.past {
+    background: linear-gradient(-45deg, #f5f5f5 20%, #e0e0e0 100%);
+    opacity: 0.8;
+  }
+
+  .events-list .event-item .event-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .events-list .event-item button.complete {
     background: transparent;
     border: none;
     color: rgba(255,255,255,0.9);
@@ -314,48 +443,111 @@
     line-height: 1;
     padding: 0 4px;
     user-select: none;
+    transition: color 0.3s ease;
   }
-  .events-list .event-item button:hover {
+
+  .events-list .event-item button.complete:hover {
     color: rgba(255,255,255,1);
   }
 
+  .events-list .event-item button.complete.completed {
+    color: #00c853;
+  }
+
+  .events-list .event-item button:not(.complete) {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.9);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 4px;
+    user-select: none;
+    transition: color 0.3s ease;
+  }
+
+  .events-list .event-item button:not(.complete):hover {
+    color: rgba(255,255,255,1);
+  }
+
+  .events-list .event-item span.details {
+    cursor: pointer;
+    flex: 1;
+  }
 
   /* Footer navigation buttons */
 
   .bottom-nav {
+    margin-left: 8px;
+    margin-right: 8px;
+    margin-bottom: 8px;
     display: flex;
-    border-top: 1px solid #ddd;
-    background: #f0f3fa;
+    background: #ffffff;
+    gap: 4px;
+    position: relative;
   }
+
   .bottom-nav button {
+    height: 50px;
     flex: 1;
     border: none;
-    background: #6cdbeb;
-    color: #1a1a1a;
+    border-radius: 10px;
+    background: linear-gradient(-45deg, #ff9c9c 0%, #ffbeb4 100%);
+    color: #ffffff;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.2rem;
     padding: 10px 6px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     user-select: none;
   }
-  .bottom-nav button:not(:last-child) {
-    border-right: 1px solid #ddd;
-  }
+
   .bottom-nav button:hover {
-    background: #4e91f9;
+    background: linear-gradient(45deg, #ff8787 0%, #ffc9c1 100%);
     color: white;
   }
+
   .bottom-nav button[aria-pressed="true"] {
-    background: #3777e3;
+    background: linear-gradient(45deg, #ff0000 0%, #ffc9c1 100%);
     color: white;
+  }
+
+  .user-avatar {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(45deg, #ff0000 0%, #ffc9c1 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+  }
+
+  .user-avatar:hover {
+    transform: translateX(-50%) scale(1.05);
+  }
+
+  .user-avatar[aria-pressed="true"] {
+    background: linear-gradient(45deg, #ff0000 0%, #ffc9c1 100%);
+    box-shadow: 0 0 0 2px #ff0000;
   }
 
   /* Add event button - smaller square with plus sign */
 
   .add-event-button {
-    background: #4e91f9;
+    background: linear-gradient(45deg, #ff0000 0%, #ffc9c1 100%);
     color: white;
+    outline: 3px solid #ffffff;
     font-weight: 700;
     font-size: 1.6rem;
     border: none;
@@ -365,8 +557,11 @@
     cursor: pointer;
     user-select: none;
     transition: background-color 0.3s ease;
-    margin: 0 auto 0 ;
-    margin-bottom: 25px;
+    position: absolute;
+    bottom: 75px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -375,7 +570,7 @@
   }
 
   .add-event-button:hover {
-    background: #3777e3;
+    background: linear-gradient(45deg, #e33737 0%, #d2a7a0 100%);
   }
 
   @media (max-width: 400px) {
@@ -390,26 +585,614 @@
       max-height: 90vh;
     }
   }
+
+  .events-list .event-item.past {
+    background: linear-gradient(135deg, #ff5a5a 0%, #ffc9c9 100%);
+    opacity: 0.7;
+  }
+
+  .events-list .event-item.past.completed {
+    background: linear-gradient(-45deg, #ffffff 20%, #b6b6b6 100%);
+  }
+
+  /* Add styles for new sorting controls */
+  .sort-controls {
+    margin-bottom: 16px;
+    padding: 0 12px;
+  }
+
+  .sort-select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    color: #333;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+  }
+
+  .sort-select:focus {
+    outline: none;
+    border-color: #ff9c9c;
+    box-shadow: 0 0 0 2px rgba(255, 156, 156, 0.2);
+  }
+
+  .sort-select option {
+    padding: 8px;
+  }
+
+  .month-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 0 12px;
+  }
+
+  .month-select, .year-select {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+  }
+
+  .auth-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .auth-modal {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+
+  .auth-modal h2 {
+    margin: 0 0 20px;
+    text-align: center;
+    color: #333;
+    font-size: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 600;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #ff9c9c;
+    box-shadow: 0 0 0 2px rgba(255, 156, 156, 0.2);
+  }
+
+  .error-message {
+    color: #ff0000;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .btn.link {
+    background: none;
+    color: #ff0000;
+    margin-top: 12px;
+  }
+
+  .btn.link:hover {
+    background: none;
+    text-decoration: underline;
+  }
+
+  .profile-container {
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(45deg, #ff0000 0%, #ffc9c1 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .profile-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+
+  .profile-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+    padding: 0 4px;
+  }
+
+  .stat-item {
+    background: #f8f9fa;
+    padding: 12px 5px;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ff0000;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 360px) {
+    .profile-stats {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .stat-item {
+      padding: 10px;
+    }
+
+    .stat-value {
+      font-size: 1.2rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+    }
+  }
+
+  .profile-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  .btn.logout {
+    background: #ff0000;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn.logout:hover {
+    background: #cc0000;
+  }
+
+  /* Стили для уведомления */
+  .notification {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(45deg, #00c853 0%, #69f0ae 100%);
+    color: white;
+    padding: 16px 32px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-weight: 600;
+    z-index: 1000;
+    transition: bottom 0.3s ease-in-out;
+  }
+
+  .notification.show {
+    bottom: 20px;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translate(-50%, 100%);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+    to {
+      transform: translate(-50%, 100%);
+      opacity: 0;
+    }
+  }
 </style>
 </head>
 <body>
   <div id="root"></div>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBPRlqcDczA1z-W5VI3kE-8CS7Plu9oxg8",
+    authDomain: "calendarplanneri122.firebaseapp.com",
+    projectId: "calendarplanneri122",
+    storageBucket: "calendarplanneri122.firebasestorage.app",
+    messagingSenderId: "293231163975",
+    appId: "1:293231163975:web:fe687b476ac795d6c88f62",
+    measurementId: "G-Q2N11MQ7BJ"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  // Функция для сохранения события в Firestore
+  async function saveEventToFirestore(userId, dateKey, event) {
+    try {
+      const eventRef = doc(db, 'events', userId);
+      const eventDoc = await getDoc(eventRef);
+      
+      if (!eventDoc.exists()) {
+        // Если документ не существует, создаем новый
+        await setDoc(eventRef, {
+          [dateKey]: [event]
+        });
+      } else {
+        // Если документ существует, обновляем события для конкретной даты
+        const currentData = eventDoc.data();
+        const currentEvents = currentData[dateKey] || [];
+        
+        // Если это обновление существующего события
+        const eventIndex = currentEvents.findIndex(e => e.id === event.id);
+        if (eventIndex !== -1) {
+          currentEvents[eventIndex] = event;
+        } else {
+          // Если это новое событие
+          currentEvents.push(event);
+        }
+        
+        await setDoc(eventRef, {
+          ...currentData,
+          [dateKey]: currentEvents
+        });
+      }
+      return true;
+    } catch (error) {
+      console.error("Error saving event to Firestore:", error);
+      throw error;
+    }
+  }
+
+  // Функция для получения событий из Firestore
+  async function getEventsFromFirestore(userId) {
+    try {
+      const eventRef = doc(db, 'events', userId);
+      const eventDoc = await getDoc(eventRef);
+      
+      if (eventDoc.exists()) {
+        return eventDoc.data();
+      }
+      return {};
+    } catch (error) {
+      console.error("Error getting events from Firestore:", error);
+      throw error;
+    }
+  }
+
+  // Экспортируем функции для использования в основном коде
+  window.saveEventToFirestore = saveEventToFirestore;
+  window.getEventsFromFirestore = getEventsFromFirestore;
+
   const { useState, useEffect, useMemo } = React;
 
+  function AuthModal({ onLogin, onRegister }) {
+    const [isLogin, setIsLogin] = useState(true);
+    const [formData, setFormData] = useState({
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+    const [error, setError] = useState('');
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      setError('');
+
+      if (!isLogin && formData.password !== formData.confirmPassword) {
+        setError('Пароли не совпадают');
+        return;
+      }
+
+      if (isLogin) {
+        onLogin(formData, setError);
+      } else {
+        onRegister(formData, setError);
+      }
+    }
+
+    return React.createElement('div', {className: 'auth-overlay'},
+      React.createElement('div', {className: 'auth-modal'},
+        React.createElement('h2', null, isLogin ? 'Вход' : 'Регистрация'),
+        React.createElement('form', {onSubmit: handleSubmit},
+          !isLogin && React.createElement('div', {className: 'form-group'},
+            React.createElement('label', {htmlFor: 'username'}, 'Имя пользователя'),
+            React.createElement('input', {
+              type: 'text',
+              id: 'username',
+              value: formData.username,
+              onChange: e => setFormData(prev => ({...prev, username: e.target.value})),
+              required: true,
+              placeholder: 'Введите имя пользователя'
+            })
+          ),
+          React.createElement('div', {className: 'form-group'},
+            React.createElement('label', {htmlFor: 'email'}, 'Email'),
+            React.createElement('input', {
+              type: 'email',
+              id: 'email',
+              value: formData.email,
+              onChange: e => setFormData(prev => ({...prev, email: e.target.value})),
+              required: true,
+              placeholder: 'Введите ваш email'
+            })
+          ),
+          React.createElement('div', {className: 'form-group'},
+            React.createElement('label', {htmlFor: 'password'}, 'Пароль'),
+            React.createElement('input', {
+              type: 'password',
+              id: 'password',
+              value: formData.password,
+              onChange: e => setFormData(prev => ({...prev, password: e.target.value})),
+              required: true,
+              placeholder: 'Введите пароль'
+            })
+          ),
+          !isLogin && React.createElement('div', {className: 'form-group'},
+            React.createElement('label', {htmlFor: 'confirmPassword'}, 'Подтвердите пароль'),
+            React.createElement('input', {
+              type: 'password',
+              id: 'confirmPassword',
+              value: formData.confirmPassword,
+              onChange: e => setFormData(prev => ({...prev, confirmPassword: e.target.value})),
+              required: true,
+              placeholder: 'Повторите пароль'
+            })
+          ),
+          error && React.createElement('div', {
+            className: 'error-message',
+            style: {
+              color: '#ff0000',
+              backgroundColor: '#ffe6e6',
+              padding: '10px',
+              borderRadius: '4px',
+              marginBottom: '16px',
+              textAlign: 'center',
+              fontSize: '0.9rem'
+            }
+          }, error),
+          React.createElement('button', {
+            type: 'submit',
+            className: 'btn'
+          }, isLogin ? 'Войти' : 'Зарегистрироваться'),
+          React.createElement('button', {
+            type: 'button',
+            className: 'btn link',
+            onClick: () => {
+              setIsLogin(!isLogin);
+              setError('');
+              setFormData({username: '', email: '', password: '', confirmPassword: ''});
+            }
+          }, isLogin ? 'Создать аккаунт' : 'Уже есть аккаунт? Войти')
+        )
+      )
+    );
+  }
+
+  function Profile({ currentUser, onLogout }) {
+    const [userStats, setUserStats] = useState({
+      totalEvents: 0,
+      completedEvents: 0,
+      upcomingEvents: 0
+    });
+    const [username, setUsername] = useState('');
+
+    useEffect(() => {
+      async function loadUserData() {
+        try {
+          // Получаем данные пользователя из Firestore
+          const userRef = doc(db, 'users', currentUser);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUsername(userData.username);
+          }
+
+          // Получаем события из Firestore для текущего пользователя
+          const eventsRef = doc(db, 'events', currentUser);
+          const eventsDoc = await getDoc(eventsRef);
+          
+          if (!eventsDoc.exists()) {
+            setUserStats({
+              totalEvents: 0,
+              completedEvents: 0,
+              upcomingEvents: 0
+            });
+            return;
+          }
+
+          const events = eventsDoc.data();
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+      
+      let total = 0;
+      let completed = 0;
+      let upcoming = 0;
+
+          // Подсчитываем статистику по всем событиям пользователя
+      Object.entries(events).forEach(([dateKey, evs]) => {
+        total += evs.length;
+        const eventDate = new Date(dateKey);
+            
+            // Проверяем, является ли событие предстоящим
+        if (eventDate >= today) {
+          upcoming += evs.length;
+        }
+      });
+
+          // Получаем информацию о выполненных событиях
+          const completedEventsRef = doc(db, 'completedEvents', currentUser);
+          const completedEventsDoc = await getDoc(completedEventsRef);
+          
+          if (completedEventsDoc.exists()) {
+            const completedEvents = completedEventsDoc.data();
+      Object.values(completedEvents).forEach(evs => {
+        completed += evs.length;
+      });
+          }
+
+      setUserStats({
+        totalEvents: total,
+        completedEvents: completed,
+        upcomingEvents: upcoming
+      });
+        } catch (error) {
+          console.error('Error loading user data:', error);
+        }
+      }
+
+      loadUserData();
+    }, [currentUser]);
+
+    return React.createElement('div', {className: 'profile-container'},
+      React.createElement('div', {className: 'profile-header'},
+        React.createElement('div', {className: 'profile-avatar'},
+          React.createElement('span', null, username ? username[0].toUpperCase() : '')
+        ),
+        React.createElement('h2', null, username || 'Загрузка...')
+      ),
+      React.createElement('div', {className: 'profile-stats'},
+        React.createElement('div', {className: 'stat-item'},
+          React.createElement('div', {className: 'stat-value'}, userStats.totalEvents),
+          React.createElement('div', {className: 'stat-label'}, 'Всего событий')
+        ),
+        React.createElement('div', {className: 'stat-item'},
+          React.createElement('div', {className: 'stat-value'}, userStats.completedEvents),
+          React.createElement('div', {className: 'stat-label'}, 'Выполнено')
+        ),
+        React.createElement('div', {className: 'stat-item'},
+          React.createElement('div', {className: 'stat-value'}, userStats.upcomingEvents),
+          React.createElement('div', {className: 'stat-label'}, 'Предстоит')
+        )
+      ),
+      React.createElement('div', {className: 'profile-actions'},
+        React.createElement('button', {
+          className: 'btn logout',
+          onClick: onLogout
+        }, 'Выйти')
+      )
+    );
+  }
+
   function CalendarPlanner() {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [username, setUsername] = useState('');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [events, setEvents] = useState(() => {
       try {
         const saved = localStorage.getItem('calendar-planner-events');
+        console.log('Loading events from localStorage:', saved);
         return saved ? JSON.parse(saved) : {};
-      } catch {
+      } catch (error) {
+        console.error('Error loading events:', error);
         return {};
       }
     });
-
+    const [completedEvents, setCompletedEvents] = useState(() => {
+      try {
+        const saved = localStorage.getItem('calendar-planner-completed');
+        console.log('Loading completed events from localStorage:', saved);
+        return saved ? JSON.parse(saved) : {};
+      } catch (error) {
+        console.error('Error loading completed events:', error);
+        return {};
+      }
+    });
+    const [sortMode, setSortMode] = useState('all');
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedEvent, setSelectedEvent] = useState(null);
@@ -417,10 +1200,17 @@
     const [viewMode, setViewMode] = useState('calendar');
     const [datePickerValue, setDatePickerValue] = useState(formatDate(new Date()));
     const [dayEventsVisibleDate, setDayEventsVisibleDate] = useState(null);
+    const [testResult, setTestResult] = useState(null);
 
     useEffect(() => {
+      console.log('Saving events to localStorage:', events);
       localStorage.setItem('calendar-planner-events', JSON.stringify(events));
     }, [events]);
+
+    useEffect(() => {
+      console.log('Saving completed events to localStorage:', completedEvents);
+      localStorage.setItem('calendar-planner-completed', JSON.stringify(completedEvents));
+    }, [completedEvents]);
 
     useEffect(() => {
       if ("Notification" in window && Notification.permission === "default") {
@@ -463,11 +1253,16 @@
     const weekdayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
     function formatDate(date) {
-  const moscowDate = new Date(date.toLocaleString("en-US", { timeZone: "Europe/Moscow" }));
-  return moscowDate.toISOString().split('T')[0];
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
   }
 
     function openAddEvent(date) {
+      if (!date) {
+        date = new Date();
+      }
       setSelectedDate(date);
       setSelectedEvent(null);
       setFormValues({ title: '', time: '', description: '' });
@@ -485,38 +1280,80 @@
       setModalOpen(true);
     }
 
-    function saveEvent() {
+    async function saveEvent() {
       if (!formValues.title.trim()) {
         alert('Пожалуйста, введите название события.');
         return;
       }
+
+      if (!currentUser) {
+        alert('Ошибка: пользователь не авторизован');
+        return;
+      }
+
       const dateKey = formatDate(selectedDate);
+      console.log('Saving event:', {
+        userId: currentUser,
+        dateKey,
+        formValues,
+        selectedEvent
+      });
+
+      try {
+        // Получаем UID пользователя из Firestore
+        const userRef = doc(db, 'users', currentUser);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+          alert('Ошибка: пользователь не найден');
+          return;
+        }
+
+        const userData = userDoc.data();
+        const userId = userData.uid;
+
       if (selectedEvent) {
-        setEvents(prev => {
-          const updatedDayEvents = prev[selectedEvent.dateKey].map(ev => {
-            if (ev.id === selectedEvent.id) {
-              return {
-                ...ev,
+          // Обновление существующего события
+          const updatedEvent = {
+            id: selectedEvent.id,
                 title: formValues.title.trim(),
                 time: formValues.time,
                 description: formValues.description.trim(),
-              };
+            userId: userId // Добавляем ID пользователя к событию
+          };
+
+          console.log('Updating existing event:', updatedEvent);
+
+          // Обновляем в Firestore
+          const eventRef = doc(db, 'events', userId);
+          const eventDoc = await getDoc(eventRef);
+          
+          if (eventDoc.exists()) {
+            const currentData = eventDoc.data();
+            const currentEvents = currentData[dateKey] || [];
+            
+            // Обновляем событие в массиве
+            const updatedEvents = currentEvents.map(ev => 
+              ev.id === selectedEvent.id ? updatedEvent : ev
+            );
+            
+            await setDoc(eventRef, {
+              ...currentData,
+              [dateKey]: updatedEvents
+            });
+          }
+
+          // Обновляем локальное состояние
+          setEvents(prev => {
+            const updatedDayEvents = prev[selectedEvent.dateKey].map(ev => {
+              if (ev.id === selectedEvent.id) {
+                return updatedEvent;
             }
             return ev;
           });
           if (selectedEvent.dateKey !== dateKey) {
             const oldDayEvents = prev[selectedEvent.dateKey].filter(ev => ev.id !== selectedEvent.id);
-            const newDayEvents = prev[dateKey] ? [...prev[dateKey], {
-              id: selectedEvent.id,
-              title: formValues.title.trim(),
-              time: formValues.time,
-              description: formValues.description.trim(),
-            }] : [{
-              id: selectedEvent.id,
-              title: formValues.title.trim(),
-              time: formValues.time,
-              description: formValues.description.trim(),
-            }];
+              const newDayEvents = prev[dateKey] ? [...prev[dateKey], updatedEvent] : [updatedEvent];
             const newEvents = {...prev};
             if (oldDayEvents.length > 0) {
               newEvents[selectedEvent.dateKey] = oldDayEvents;
@@ -530,22 +1367,81 @@
           }
         });
       } else {
+          // Создание нового события
         const newEvent = {
           id: Date.now(),
           title: formValues.title.trim(),
           time: formValues.time,
           description: formValues.description.trim(),
-        };
+            userId: userId // Добавляем ID пользователя к событию
+          };
+
+          console.log('Creating new event:', newEvent);
+
+          // Сохраняем в Firestore
+          const eventRef = doc(db, 'events', userId);
+          const eventDoc = await getDoc(eventRef);
+          
+          if (!eventDoc.exists()) {
+            // Если документ не существует, создаем новый
+            await setDoc(eventRef, {
+              [dateKey]: [newEvent]
+            });
+          } else {
+            // Если документ существует, добавляем событие
+            const currentData = eventDoc.data();
+            const currentEvents = currentData[dateKey] || [];
+            await setDoc(eventRef, {
+              ...currentData,
+              [dateKey]: [...currentEvents, newEvent]
+            });
+          }
+
+          // Обновляем локальное состояние
         setEvents(prev => {
           const dayEvents = prev[dateKey] ? [...prev[dateKey], newEvent] : [newEvent];
           return {...prev, [dateKey]: dayEvents};
         });
       }
+
+        console.log('Event saved successfully');
       setModalOpen(false);
       setDayEventsVisibleDate(null);
+      } catch (error) {
+        console.error("Error saving event:", error);
+        alert("Ошибка при сохранении события: " + error.message);
+      }
     }
 
-    function removeEvent(dateKey, eventId) {
+    async function removeEvent(dateKey, eventId) {
+      try {
+        // Получаем текущие события из Firestore
+        const eventRef = doc(db, 'events', currentUser);
+        const eventDoc = await getDoc(eventRef);
+        
+        if (eventDoc.exists()) {
+          const currentData = eventDoc.data();
+          const currentEvents = currentData[dateKey] || [];
+          
+          // Фильтруем событие
+          const filteredEvents = currentEvents.filter(ev => ev.id !== eventId);
+          
+          // Обновляем документ в Firestore
+          if (filteredEvents.length === 0) {
+            // Если больше нет событий на эту дату, удаляем дату
+            const newData = { ...currentData };
+            delete newData[dateKey];
+            await setDoc(eventRef, newData);
+          } else {
+            // Иначе обновляем массив событий
+            await setDoc(eventRef, {
+              ...currentData,
+              [dateKey]: filteredEvents
+            });
+          }
+        }
+
+        // Обновляем локальное состояние
       setEvents(prev => {
         const filtered = prev[dateKey].filter(ev => ev.id !== eventId);
         const newEvents = { ...prev };
@@ -556,8 +1452,13 @@
         }
         return newEvents;
       });
+
       if (selectedEvent && selectedEvent.id === eventId) {
         setModalOpen(false);
+        }
+      } catch (error) {
+        console.error("Error removing event:", error);
+        alert("Ошибка при удалении события. Пожалуйста, попробуйте снова.");
       }
     }
 
@@ -597,34 +1498,379 @@
         setDayEventsVisibleDate(date);
     }
 
-    return React.createElement('div', {className: 'calendar-planner', style: {height:'100%', display:'flex', flexDirection:'column', overflow: 'hidden'}},
-      React.createElement('header', {role: 'banner'},
-        React.createElement('h1', null, 'Календарь')
-      ),
-      viewMode === 'calendar' && React.createElement('div', {className: 'month-navigation'},
+    async function toggleEventCompletion(dateKey, eventId) {
+      try {
+        console.log('Starting toggleEventCompletion:', { dateKey, eventId, currentUser });
+
+        // Находим событие
+        const event = events[dateKey]?.find(ev => ev.id === eventId);
+        if (!event) {
+          console.error('Event not found:', { dateKey, eventId, events });
+          return;
+        }
+        console.log('Found event:', event);
+
+        // Проверяем наличие currentUser
+        if (!currentUser) {
+          console.error('No current user found');
+          alert('Ошибка: пользователь не авторизован');
+          return;
+        }
+
+        // Создаем элемент уведомления
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = `Событие "${event.title}" выполнено!`;
+        document.body.appendChild(notification);
+
+        // Показываем уведомление
+          setTimeout(() => {
+          notification.classList.add('show');
+        }, 100);
+
+        // Получаем текущие события из Firestore
+        console.log('Fetching events from Firestore...');
+        const eventRef = doc(db, 'events', currentUser);
+        const eventDoc = await getDoc(eventRef);
+        
+        if (!eventDoc.exists()) {
+          console.error('Events document not found for user:', currentUser);
+          return;
+        }
+        console.log('Current events data:', eventDoc.data());
+
+        const currentData = eventDoc.data();
+        const currentEvents = currentData[dateKey] || [];
+        
+        // Фильтруем событие
+        const filteredEvents = currentEvents.filter(ev => ev.id !== eventId);
+        
+        // Обновляем документ в Firestore
+        console.log('Updating Firestore with filtered events');
+        if (filteredEvents.length === 0) {
+          // Если больше нет событий на эту дату, удаляем дату
+          const newData = { ...currentData };
+          delete newData[dateKey];
+          await setDoc(eventRef, newData);
+        } else {
+          // Иначе обновляем массив событий
+          await setDoc(eventRef, {
+            ...currentData,
+            [dateKey]: filteredEvents
+          });
+        }
+
+        // Обновляем локальное состояние
+        console.log('Updating local state...');
+            setEvents(prev => {
+          const filtered = prev[dateKey].filter(ev => ev.id !== eventId);
+              const newEvents = { ...prev };
+          if (filtered.length === 0) {
+                  delete newEvents[dateKey];
+          } else {
+            newEvents[dateKey] = filtered;
+                }
+              return newEvents;
+            });
+
+        // Обновляем локальное состояние выполненных событий
+            setCompletedEvents(prev => {
+          const newCompletedEvents = { ...prev };
+          if (!newCompletedEvents[dateKey]) {
+            newCompletedEvents[dateKey] = [];
+          }
+          if (!newCompletedEvents[dateKey].includes(eventId)) {
+            newCompletedEvents[dateKey].push(eventId);
+          }
+          return newCompletedEvents;
+        });
+
+        // Скрываем уведомление через 2 секунды
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 300);
+          }, 2000);
+
+        console.log('Event completion toggled successfully');
+
+      } catch (error) {
+        console.error("Error toggling event completion:", error);
+        alert("Ошибка при обновлении статуса события: " + error.message);
+      }
+    }
+
+    function isEventCompleted(dateKey, eventId) {
+      const completed = completedEvents[dateKey]?.includes(eventId) || false;
+      console.log('Checking completion status:', { dateKey, eventId, completed, completedEvents });
+      return completed;
+    }
+
+    async function handleLogin(formData, setError) {
+      try {
+        // Проверяем формат email
+        if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          setError('Неверный формат email');
+          return;
+        }
+        
+        // Пытаемся войти через Firebase Authentication
+        const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        const user = userCredential.user;
+
+        // Получаем имя пользователя из Firestore
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+          setError('Пользователь не найден');
+          return;
+        }
+
+        const userData = userDoc.data();
+        console.log('User data loaded:', userData); // Добавляем для отладки
+
+        if (!userData.username) {
+          console.error('Username not found in user data');
+          setError('Ошибка: имя пользователя не найдено');
+          return;
+        }
+
+        setIsAuthenticated(true);
+        setCurrentUser(user.uid);
+        setUsername(userData.username);
+        localStorage.setItem('currentUser', user.uid);
+        localStorage.setItem('username', userData.username);
+
+        // Загружаем события из Firestore
+        const eventsRef = doc(db, 'events', user.uid);
+        const eventsDoc = await getDoc(eventsRef);
+        
+        if (eventsDoc.exists()) {
+          setEvents(eventsDoc.data());
+        }
+
+        console.log('User logged in successfully:', userData.username);
+      } catch (error) {
+        console.error('Error during login:', error);
+        switch (error.code) {
+          case 'auth/user-not-found':
+          case 'auth/invalid-credential':
+            setError('Пользователь с таким email не найден');
+            break;
+          case 'auth/wrong-password':
+            setError('Введен неверный пароль');
+            break;
+          case 'auth/invalid-email':
+            setError('Неверный формат email');
+            break;
+          case 'auth/too-many-requests':
+            setError('Слишком много попыток входа. Попробуйте позже');
+            break;
+          default:
+            setError('Ошибка при входе: ' + error.message);
+        }
+      }
+    }
+
+    async function handleRegister(formData, setError) {
+      try {
+        // Проверяем формат логина
+        if (!formData.username.match(/^[a-zA-Zа-яА-Я0-9_]+$/)) {
+          setError('Имя пользователя может содержать только буквы, цифры и знак подчеркивания');
+        return;
+      }
+
+        // Проверяем формат email
+        if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          setError('Неверный формат email');
+          return;
+        }
+        
+        // Проверяем подключение к интернету
+        if (!navigator.onLine) {
+          setError('Отсутствует подключение к интернету. Пожалуйста, проверьте ваше соединение и попробуйте снова.');
+          return;
+        }
+
+        // Создаем пользователя через Firebase Authentication с указанным email
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        const user = userCredential.user;
+
+        console.log('User created with UID:', user.uid);
+
+        // Создаем документ пользователя в Firestore
+        const userRef = doc(db, 'users', user.uid);
+        const userData = {
+          username: formData.username,
+          email: formData.email,
+          uid: user.uid,
+          createdAt: new Date().toISOString(),
+        events: {}
+      };
+
+        console.log('Saving user data:', userData);
+
+        await setDoc(userRef, userData);
+
+        // Проверяем, что данные сохранились
+        const savedUserDoc = await getDoc(userRef);
+        if (!savedUserDoc.exists()) {
+          throw new Error('Failed to save user data');
+        }
+
+        const savedUserData = savedUserDoc.data();
+        console.log('Saved user data:', savedUserData);
+
+        // Устанавливаем состояние авторизации
+      setIsAuthenticated(true);
+        setCurrentUser(user.uid);
+        setUsername(formData.username);
+        localStorage.setItem('currentUser', user.uid);
+        localStorage.setItem('username', formData.username);
+
+        console.log('User registered successfully:', formData.username);
+      } catch (error) {
+        console.error('Error during registration:', error);
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            setError('Пользователь с таким email уже существует');
+            break;
+          case 'auth/invalid-email':
+            setError('Неверный формат email');
+            break;
+          case 'auth/weak-password':
+            setError('Пароль должен содержать минимум 6 символов');
+            break;
+          case 'auth/network-request-failed':
+            setError('Ошибка сети. Пожалуйста, проверьте ваше интернет-соединение и попробуйте снова.');
+            break;
+          case 'auth/too-many-requests':
+            setError('Слишком много попыток регистрации. Пожалуйста, попробуйте позже.');
+            break;
+          default:
+            setError('Ошибка при регистрации: ' + (error.message || 'Неизвестная ошибка'));
+        }
+      }
+    }
+
+    function handleLogout() {
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      setUsername('');
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('username');
+      setEvents({}); // Очищаем события при выходе
+    }
+
+    // Загрузка данных из localStorage при инициализации
+    useEffect(() => {
+      const savedUser = localStorage.getItem('currentUser');
+      const savedUsername = localStorage.getItem('username');
+      if (savedUser) {
+        setIsAuthenticated(true);
+        setCurrentUser(savedUser);
+        if (savedUsername) {
+          setUsername(savedUsername);
+          console.log('Loaded username from localStorage:', savedUsername);
+        }
+      }
+    }, []);
+
+    async function testFirestoreConnection() {
+      try {
+        const result = await testFirestore();
+        setTestResult(result);
+        console.log("Firestore test result:", result);
+      } catch (error) {
+        console.error("Error testing Firestore:", error);
+        setTestResult({ success: false, error: error.message });
+      }
+    }
+
+    if (!isAuthenticated) {
+      return React.createElement(AuthModal, {
+        onLogin: handleLogin,
+        onRegister: handleRegister
+      });
+    }
+
+    const renderContent = () => {
+      switch(viewMode) {
+        case 'profile':
+          return React.createElement(Profile, {
+            currentUser,
+            onLogout: handleLogout
+          });
+        case 'list':
+          return React.createElement(EventsList, {
+            events: allEventsSorted,
+            onEdit: openEditEvent,
+            onDelete: removeEvent,
+            isEventCompleted: isEventCompleted,
+            toggleEventCompletion: toggleEventCompletion,
+            sortMode: sortMode,
+            setSortMode: setSortMode,
+            selectedMonth: selectedMonth,
+            setSelectedMonth: setSelectedMonth,
+            selectedYear: selectedYear,
+            setSelectedYear: setSelectedYear
+          });
+        case 'calendar':
+          return React.createElement(React.Fragment, null,
+            React.createElement('div', {className: 'calendar-container'},
+              React.createElement('div', {className: 'calendar-content'},
+        React.createElement('div', {className: 'month-navigation'},
         React.createElement('button', {
           onClick: () => {
             const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
             setCurrentDate(newDate);
             setDatePickerValue(formatDate(newDate));
+                      setDayEventsVisibleDate(null);
           },
           className: 'month-nav-button'
         }, '←'),
-        React.createElement('span', {className: 'current-month'}, 
-          currentDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })
+                  React.createElement('div', {className: 'current-month'},
+                    React.createElement('select', {
+                      className: 'month-select',
+                      value: currentDate.getMonth(),
+                      onChange: (e) => {
+                        const newDate = new Date(currentDate.getFullYear(), parseInt(e.target.value), 1);
+                        setCurrentDate(newDate);
+                        setDatePickerValue(formatDate(newDate));
+                        setDayEventsVisibleDate(null);
+                      }
+                    }, [
+                      'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                      'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+                    ].map((month, index) => 
+                      React.createElement('option', {key: month, value: index}, month)
+                    )),
+                    React.createElement('select', {
+                      className: 'year-select',
+                      value: currentDate.getFullYear(),
+                      onChange: (e) => {
+                        const newDate = new Date(parseInt(e.target.value), currentDate.getMonth(), 1);
+                        setCurrentDate(newDate);
+                        setDatePickerValue(formatDate(newDate));
+                        setDayEventsVisibleDate(null);
+                      }
+                    }, Array.from({length: 10}, (_, i) => currentDate.getFullYear() - 5 + i).map(year => 
+                      React.createElement('option', {key: year, value: year}, year)
+                    ))
         ),
         React.createElement('button', {
           onClick: () => {
             const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
             setCurrentDate(newDate);
             setDatePickerValue(formatDate(newDate));
+                      setDayEventsVisibleDate(null);
           },
           className: 'month-nav-button'
         }, '→')
-      ),
-      viewMode === 'calendar' && React.createElement(React.Fragment, null,
-        React.createElement('div', {className: 'calendar-container', style: {display: 'flex', flexDirection: 'column', overflow: 'auto', flex: 1}},
-          React.createElement('div', {className: 'calendar', role: 'application', 'aria-label': 'Месячный календарь'},
+                ),
+                React.createElement('div', {className: 'calendar', role: 'application', 'aria-label': 'Месячный календарь'},
             React.createElement('div', {className: 'weekdays'}, weekdayNames.map(wd => React.createElement('div', {key: wd}, wd))),
             React.createElement('div', {className: 'days'}, calendarDays.map(({date, currentMonth}) => {
             const dateKey = formatDate(date);
@@ -648,10 +1894,13 @@
             );
           }))
           ),
-          dayEventsVisibleDate && dayEvents.length > 0 && React.createElement('div', {className: 'events-list-wrapper', style: {marginTop: '10px'}, 'aria-live': 'polite'},
-            React.createElement('h3', null, `События за ${dayEventsVisibleDate.toLocaleDateString()}`),
+          dayEventsVisibleDate && dayEvents.length > 0 && React.createElement('div', {className: 'events-list-wrapper', 'aria-live': 'polite'},
+                  React.createElement('h3', null, `События за ${dayEventsVisibleDate.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', year: 'numeric'})}`),
             React.createElement('div', {className: 'events-list'},
-              dayEvents.map(ev => React.createElement('div', {className: 'event-item', key: ev.id},
+                    dayEvents.map(ev => React.createElement('div', {
+                      className: `event-item${isEventCompleted(formatDate(dayEventsVisibleDate), ev.id) ? ' completed' : ''}`,
+                      key: ev.id
+                    },
                 React.createElement('span', {
                   className: 'details',
                   tabIndex: 0,
@@ -661,40 +1910,78 @@
                   title: ev.description || ev.title,
                   'aria-label': `Редактировать событие ${ev.title} в ${ev.time || 'без времени'}`
                 }, (ev.time ? ev.time + ' ' : '') + ev.title),
+                      React.createElement('div', {className: 'event-actions'},
+                        React.createElement('button', {
+                          className: `complete${isEventCompleted(formatDate(dayEventsVisibleDate), ev.id) ? ' completed' : ''}`,
+                          'aria-label': isEventCompleted(formatDate(dayEventsVisibleDate), ev.id) ? 
+                            `Отметить событие ${ev.title} как невыполненное` : 
+                            `Отметить событие ${ev.title} как выполненное`,
+                          onClick: () => toggleEventCompletion(formatDate(dayEventsVisibleDate), ev.id)
+                        }, '✓'),
                 React.createElement('button', {
                   'aria-label': `Удалить событие ${ev.title}`,
                   onClick: () => removeEvent(formatDate(dayEventsVisibleDate), ev.id)
                 }, '×')
+                      )
               ))
-            )
           )
         ),
         React.createElement('button', {
           className: 'add-event-button',
-          onClick: () => openAddEvent(currentDate),
+                  onClick: () => {
+                    const today = new Date();
+                    openAddEvent(dayEventsVisibleDate || today);
+                  },
           'aria-label': 'Добавить событие'
         }, '+'),
         null
+              )
+            )
+          );
+      }
+    };
+
+    return React.createElement('div', {className: 'calendar-planner', style: {height:'100%', display:'flex', flexDirection:'column', overflow: 'hidden'}},
+      React.createElement('header', {role: 'banner'},
+        React.createElement('h1', null, viewMode === 'list' ? 'Ваши планы' : viewMode === 'profile' ? 'Профиль' : 'Календарь')
       ),
-      viewMode === 'list' && React.createElement('div', {className: 'events-list-wrapper', style: {flexGrow: 1, overflow: 'hidden'}},
-        React.createElement(EventsList, {
-          events: allEventsSorted,
-          onEdit: openEditEvent,
-          onDelete: removeEvent
-        }),
+      testResult && React.createElement('div', {
+        style: {
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'white',
+          padding: '20px',
+          borderRadius: '8px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          zIndex: 1000
+        }
+      },
+        React.createElement('h3', null, 'Результат теста Firestore'),
+        React.createElement('pre', null, JSON.stringify(testResult, null, 2)),
+        React.createElement('button', {
+          onClick: () => setTestResult(null),
+          style: {
+            marginTop: '10px',
+            padding: '5px 10px',
+            background: '#ff0000',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }
+        }, 'Закрыть')
       ),
+      renderContent(),
       modalOpen && React.createElement(EventModal, {
         date: selectedDate,
-        formValues,
-        setFormValues,
-        onClose: () => {
-          setModalOpen(false);
-          setSelectedEvent(null);
-          setDayEventsVisibleDate(null);
-        },
+        formValues: formValues,
+        setFormValues: setFormValues,
+        onClose: () => setModalOpen(false),
         onSave: saveEvent,
         editingEvent: selectedEvent,
-        setSelectedDate
+        setSelectedDate: setSelectedDate
       }),
       React.createElement('div', {className: 'bottom-nav', role: "tablist", 'aria-label': 'Переключение видов'},
         React.createElement('button', {
@@ -706,7 +1993,7 @@
           role: "tab",
           tabIndex: 0,
           'aria-label': 'Показать список событий',
-        }, 'Список событий'),
+        }, 'Ваши планы'),
         React.createElement('button', {
           'aria-pressed': viewMode === 'calendar',
           onClick: () => setViewMode('calendar'),
@@ -714,12 +2001,14 @@
           tabIndex: 0,
           'aria-label': 'Показать календарь',
         }, 'Календарь'),
-        React.createElement('button', {
-          disabled: true,
-          style: {opacity: 0, cursor: 'default'},
-          tabIndex: -1,
-          'aria-hidden': true
-        }, '') 
+        React.createElement('div', {
+          className: 'user-avatar',
+          'aria-pressed': viewMode === 'profile',
+          onClick: () => setViewMode('profile'),
+          role: "tab",
+          tabIndex: 0,
+          'aria-label': 'Открыть личный кабинет',
+        }, username ? username[0].toUpperCase() : '?')
       )
     );
   }
@@ -729,28 +2018,45 @@
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+      return `${day}/${month}/${year}`;
+    }
+
+    function parseDate(dateStr) {
+      const [day, month, year] = dateStr.split('/');
+      return new Date(year, parseInt(month, 10) - 1, parseInt(day, 10));
+    }
+
+    function formatTime(timeStr) {
+      if (!timeStr) return '';
+      const [hours, minutes] = timeStr.split(':');
+      return `${hours.padStart(2, '0')}:${minutes}`;
   }
 
     function onDateChange(e) {
       const val = e.target.value;
       if (val) {
-        const [y,m,d] = val.split("-");
-        const parsedDate = new Date(y, parseInt(m,10) - 1, parseInt(d,10));
+        const parsedDate = parseDate(val);
         setSelectedDate(parsedDate);
       }
     }
 
+    function onTimeChange(e) {
+      const val = e.target.value;
+      setFormValues(prev => ({...prev, time: formatTime(val)}));
+    }
+
     return React.createElement('div', {className:'modal-overlay', role:'dialog', 'aria-modal':'true', 'aria-labelledby':'modalTitle'},
       React.createElement('div', {className:'modal'},
-        React.createElement('h2', {id:'modalTitle'}, editingEvent ? 'Редактировать событие' : `Добавить событие для ${date.toDateString()}`),
+        React.createElement('h2', {id:'modalTitle'}, editingEvent ? 'Редактировать событие' : `Добавить событие на ${date.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', year: 'numeric'})}`),
         React.createElement('label', {htmlFor: 'modalDate'}, 'Дата'),
         React.createElement('input', {
           id: 'modalDate',
-          type: 'date',
+          type: 'text',
           required: true,
           value: formatDate(date),
           onChange: onDateChange,
+          placeholder: 'ДД/ММ/ГГГГ',
+          pattern: '\\d{2}/\\d{2}/\\d{4}'
         }),
         React.createElement('label', {htmlFor: 'titleInput'}, 'Название *'),
         React.createElement('input', {
@@ -768,7 +2074,11 @@
           id: 'timeInput',
           type: 'time',
           value: formValues.time,
-          onChange: e => setFormValues(prev => ({...prev, time: e.target.value})),
+          onChange: onTimeChange,
+          step: '1800',
+          style: { textTransform: 'uppercase' },
+          lang: 'ru-RU',
+          'data-format': '24h'
         }),
         React.createElement('label', {htmlFor: 'descInput'}, 'Описание (необязательно)'),
         React.createElement('textarea', {
@@ -786,27 +2096,59 @@
     );
   }
 
-  function EventsList({ events, onEdit, onDelete }) {
+  function EventsList({ events, onEdit, onDelete, isEventCompleted, toggleEventCompletion, sortMode, setSortMode, selectedMonth, setSelectedMonth, selectedYear, setSelectedYear }) {
     if (!events.length) {
       return React.createElement('div', {className: 'events-list', role:'region', 'aria-label':'Список событий'}, 
         React.createElement('h3', null, 'Нет запланированных событий'));
     }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const filteredEvents = events.filter(ev => {
+      const eventDate = new Date(ev.dateKey);
+      if (sortMode === 'month') {
+        return eventDate.getMonth() === selectedMonth && eventDate.getFullYear() === selectedYear;
+      }
+      return true;
+    });
+
+    const upcomingEvents = filteredEvents.filter(ev => {
+      const eventDate = new Date(ev.dateKey);
+      return eventDate >= today;
+    });
+
+    const pastEvents = filteredEvents.filter(ev => {
+      const eventDate = new Date(ev.dateKey);
+      return eventDate < today;
+    });
+
+    const renderEventsList = (eventsList, isPast = false) => {
+      if (!eventsList.length) return null;
+
     const grouped = {};
-    events.forEach(ev => {
+      eventsList.forEach(ev => {
       if (!grouped[ev.dateKey]) grouped[ev.dateKey] = [];
       grouped[ev.dateKey].push(ev);
     });
     const sortedDates = Object.keys(grouped).sort();
 
-    return React.createElement('section', {className: 'events-list', role: 'region', 'aria-label': 'Список запланированных событий'},
-      React.createElement('h3', null, 'Запланированные события'),
+      return React.createElement('div', null,
+        (sortMode === 'all' || sortMode === 'month') && React.createElement('h3', null, isPast ? 'Просроченные события' : 'Предстоящие события'),
       sortedDates.map(dateKey => {
+          const date = new Date(dateKey);
+          const isToday = date.toDateString() === today.toDateString();
         return React.createElement('div', {key: dateKey},
           React.createElement('h4', {style: {margin: '4px 0', fontWeight: '600', fontSize: '1rem', color: '#555'}},
-            new Date(dateKey).toLocaleDateString(undefined, {year:'numeric', month:'long', day:'numeric'})
+              isToday ? 'Сегодня' : date.toLocaleDateString('ru-RU', {year:'numeric', month:'long', day:'numeric'})
           ),
-          grouped[dateKey].map(ev =>
-            React.createElement('div', {className: 'event-item', key: ev.id},
+            grouped[dateKey].map(ev => {
+              const completed = isEventCompleted(dateKey, ev.id);
+              console.log('Rendering event:', { event: ev, dateKey, completed });
+              return React.createElement('div', {
+                className: `event-item${completed ? ' completed' : ''}${isPast ? ' past' : ''}`,
+                key: ev.id
+              },
               React.createElement('span', {
                 className: 'details',
                 tabIndex: 0,
@@ -816,15 +2158,98 @@
                 title: ev.description || ev.title,
                 'aria-label': `Редактировать событие ${ev.title} в ${ev.time || 'без времени'}`
               }, (ev.time ? ev.time + ' ' : '') + ev.title),
+                React.createElement('div', {className: 'event-actions'},
+                  React.createElement('button', {
+                    className: `complete${completed ? ' completed' : ''}`,
+                    'aria-label': completed ? 
+                      `Отметить событие ${ev.title} как невыполненное` : 
+                      `Отметить событие ${ev.title} как выполненное`,
+                    onClick: () => toggleEventCompletion(dateKey, ev.id)
+                  }, '✓'),
               React.createElement('button', {
                 'aria-label': `Удалить событие ${ev.title}`,
                 onClick: () => onDelete(dateKey, ev.id)
               }, '×')
-            )
           )
+              );
+            })
         );
       })
+      );
+    };
+
+    const renderContent = () => {
+      switch(sortMode) {
+        case 'upcoming':
+          return renderEventsList(upcomingEvents);
+        case 'past':
+          return renderEventsList(pastEvents, true);
+        case 'month':
+          return React.createElement(React.Fragment, null,
+            renderEventsList(upcomingEvents),
+            pastEvents.length > 0 && React.createElement('div', {style: {marginTop: '20px'}},
+              renderEventsList(pastEvents, true)
+            )
+          );
+        default: // 'all'
+          return React.createElement(React.Fragment, null,
+            renderEventsList(upcomingEvents),
+            pastEvents.length > 0 && React.createElement('div', {style: {marginTop: '20px'}},
+              renderEventsList(pastEvents, true)
+            )
+          );
+      }
+    };
+
+    return React.createElement('section', {className: 'events-list', role: 'region', 'aria-label': 'Список событий'},
+      React.createElement('div', {className: 'sort-controls'},
+        React.createElement('select', {
+          value: sortMode,
+          onChange: (e) => setSortMode(e.target.value),
+          className: 'sort-select'
+        }, [
+          React.createElement('option', {key: 'all', value: 'all'}, 'Все события'),
+          React.createElement('option', {key: 'upcoming', value: 'upcoming'}, 'Предстоящие события'),
+          React.createElement('option', {key: 'past', value: 'past'}, 'Просроченные события'),
+          React.createElement('option', {key: 'month', value: 'month'}, 'По месяцам')
+        ])
+      ),
+      renderContent()
     );
+  }
+
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+  }
+
+  // Add to Home Screen prompt
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Show install button or notification here
+  });
+
+  // Handle install button click
+  function installApp() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        }
+        deferredPrompt = null;
+      });
+    }
   }
 
   ReactDOM.createRoot(document.getElementById('root')).render(
